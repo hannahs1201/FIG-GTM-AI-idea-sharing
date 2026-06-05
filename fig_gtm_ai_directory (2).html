@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FIG GTM — AI Idea Sharing</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green: #395542; --green-light: #e8f0ea; --green-mid: #c2dbc8;
+    --blue: #9bcbeb; --blue-light: #e8f4fa; --blue-dark: #1a4a6b; --blue-xdark: #0a2e47;
+    --text: #111; --text-secondary: #555; --border: rgba(0,0,0,0.1);
+    --bg: #f7f6f3; --card-bg: #fff; --impact-bg: #f0f8f4;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  header {
+    background: var(--green); padding: 2rem 2.5rem 1.75rem;
+    display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+  }
+  header h1 { font-family: 'DM Serif Display', serif; font-size: 28px; font-weight: 400; color: #fff; line-height: 1.2; }
+  header p { font-size: 14px; color: rgba(255,255,255,0.65); margin-top: 4px; }
+  .count-badge {
+    font-size: 13px; color: rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.12); border: 0.5px solid rgba(255,255,255,0.2);
+    padding: 6px 14px; border-radius: 999px; white-space: nowrap;
+  }
+  .count-badge span { color: #fff; font-weight: 500; }
+  .top-bar {
+    background: #fff; border-bottom: 0.5px solid var(--border);
+    padding: 0.75rem 2.5rem; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .filter-label { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--green); font-weight: 500; margin-right: 4px; }
+  .chip {
+    font-size: 12px; padding: 5px 14px; border-radius: 999px; cursor: pointer;
+    border: 0.5px solid var(--green); background: transparent; color: var(--green);
+    font-family: 'DM Sans', sans-serif; transition: all .12s; line-height: 1;
+  }
+  .chip.active { background: var(--green); color: #fff; }
+  .chip:hover:not(.active) { background: var(--green-light); }
+  .body { display: flex; align-items: flex-start; padding: 1.5rem 2.5rem 3rem; gap: 1.5rem; max-width: 1200px; margin: 0 auto; }
+  .sidebar { flex-shrink: 0; width: 140px; padding-top: 0.25rem; position: sticky; top: 57px; }
+  .sidebar-label { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--green); font-weight: 500; margin-bottom: 8px; }
+  .side-chips { display: flex; flex-direction: column; gap: 6px; }
+  .side-chip {
+    font-size: 12px; padding: 6px 10px; border-radius: 8px; cursor: pointer;
+    border: 0.5px solid var(--blue); background: transparent; color: var(--blue-dark);
+    font-family: 'DM Sans', sans-serif; transition: all .12s; text-align: left; width: 100%; line-height: 1.35;
+  }
+  .side-chip.active { background: var(--blue); color: var(--blue-xdark); border-color: var(--blue); font-weight: 500; }
+  .side-chip:hover:not(.active) { background: var(--blue-light); }
+  .main { flex: 1; min-width: 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .card {
+    background: var(--card-bg); border: 0.5px solid var(--border); border-radius: 12px;
+    padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 9px;
+    border-top: 3px solid var(--blue); transition: box-shadow .15s;
+  }
+  .card:hover { box-shadow: 0 2px 12px rgba(57,85,66,0.08); }
+  .card-head { display: flex; align-items: flex-start; gap: 9px; }
+  .avatar {
+    width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 500; color: #fff; background: var(--green);
+  }
+  .name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .role-badge {
+    display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px;
+    background: var(--blue-light); color: var(--blue-dark); border: 0.5px solid var(--blue); margin-top: 3px;
+  }
+  .sec { display: flex; flex-direction: column; gap: 2px; }
+  .sec-label { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--green); font-weight: 500; }
+  .sec-body { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+  .impact-pill {
+    display: inline-block; font-size: 11px; padding: 4px 10px; border-radius: 6px;
+    background: var(--impact-bg); color: var(--green); border: 0.5px solid var(--green-mid); line-height: 1.5;
+  }
+  .empty { grid-column: 1/-1; padding: 3rem; text-align: center; color: var(--text-secondary); font-size: 14px; }
+  @media (max-width: 640px) {
+    header { padding: 1.5rem; }
+    .body { flex-direction: column; padding: 1rem 1rem 2rem; }
+    .sidebar { width: 100%; position: static; }
+    .side-chips { flex-direction: row; flex-wrap: wrap; }
+    .side-chip { width: auto; }
+    .top-bar { padding: 0.75rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>FIG GTM — AI idea sharing</h1>
+    <p>How our team uses AI across sales, marketing, and operations</p>
+  </div>
+  <div class="count-badge"><span id="count">21</span> contributors</div>
+</header>
+
+<div class="top-bar">
+  <span class="filter-label">Role</span>
+  <button class="chip active" onclick="setDept('all',this)">All</button>
+  <button class="chip" onclick="setDept('Sales',this)">Sales</button>
+  <button class="chip" onclick="setDept('Marketing',this)">Marketing</button>
+  <button class="chip" onclick="setDept('RevOps',this)">RevOps / Ops</button>
+  <button class="chip" onclick="setDept('Leadership',this)">Leadership</button>
+</div>
+
+<div class="body">
+  <div class="sidebar">
+    <div class="sidebar-label">Impact</div>
+    <div class="side-chips">
+      <button class="side-chip active" onclick="setImpact('all',this)">All impacts</button>
+      <button class="side-chip" onclick="setImpact('time',this)">Time savings</button>
+      <button class="side-chip" onclick="setImpact('quality',this)">Quality improvement</button>
+      <button class="side-chip" onclick="setImpact('volume',this)">Volume / reach</button>
+      <button class="side-chip" onclick="setImpact('insight',this)">Better insights</button>
+      <button class="side-chip" onclick="setImpact('efficiency',this)">Sales efficiency</button>
+    </div>
+  </div>
+  <div class="main">
+    <div class="grid" id="grid"></div>
+  </div>
+</div>
+
+<script>
+const people = [
+  { name:"Jamie Fowler", role:"Inside AE", dept:["Sales"],
+    task:"Created customer follow-up emails and meeting recaps manually by reviewing recordings and organizing notes.",
+    input:"Call recordings/transcripts, CRM notes, email threads, pricing details, product documentation",
+    assist:"Summarize, draft, personalize, and organize follow-up communication",
+    output:"Customer recap emails, executive summaries, proposal language, internal strategy notes",
+    impact:"Significant time savings, faster response times, more polished communication, increased daily customer touchpoints",
+    tags:["time","quality","volume"] },
+  { name:"Tony Odem", role:"Outside AE", dept:["Sales"],
+    task:"Researched bank details manually and drafted alignment emails from scratch.",
+    input:"Prompts, call notes, stylistic outline",
+    assist:"Drafts and summarizes bank information",
+    output:"Emails and battlecards",
+    impact:"Time savings, higher-quality alignment emails",
+    tags:["time","quality"] },
+  { name:"Jody Weissenberger", role:"Outside AE", dept:["Sales"],
+    task:"Manually wrote alignment emails.",
+    input:"Prompts, meeting notes, stylistic outline",
+    assist:"Drafting and summarizing bank-specific content",
+    output:"Emails",
+    impact:"Time savings, improved email quality",
+    tags:["time","quality"] },
+  { name:"Ben Greene", role:"Sales Manager", dept:["Leadership"],
+    task:"Managed renewals, contract modernization, pricing discussions, executive communication, and pipeline strategy manually.",
+    input:"Call notes, contracts/MSAs, renewal proposals, CRM data, pricing models, QBR decks, implementation timelines, consultant feedback",
+    assist:"Summarizes discussions, drafts executive messaging, creates negotiation language, analyzes pricing/ARR, builds QBR content, develops talk tracks",
+    output:"Customer emails, renewal strategies, executive summaries, QBR slides, contract language, objection handling, pricing justifications",
+    impact:"Faster turnaround, improved consistency and professionalism, better responsiveness, increased sales efficiency",
+    tags:["time","quality","efficiency"] },
+  { name:"Judy Williams", role:"Sales Engineer", dept:["Sales","RevOps"],
+    task:"Reviewed demo scripts manually.",
+    input:"Demo scripts and outlines",
+    assist:"Identifies redundancies and unclear language",
+    output:"Recommendations for clarity and conciseness",
+    impact:"More streamlined and engaging demos",
+    tags:["quality"] },
+  { name:"Sherry Brickell", role:"VP Sales", dept:["Leadership"],
+    task:"Created emails, talk tracks, decks, business plans, reports, and competitive intel manually.",
+    input:"Prompts",
+    assist:"Drafts, summarizes, analyzes, personalizes, and creates content",
+    output:"Emails, talk tracks, battlecards, sequences, one-pagers",
+    impact:"Time savings, higher quality, more concise output",
+    tags:["time","quality"] },
+  { name:"Barbara Domin", role:"Sales", dept:["Sales"],
+    task:"Drafted emails manually.",
+    input:"Required significant time to determine messaging",
+    assist:"Drafted Gong flows by persona",
+    output:"Gong flows",
+    impact:"Significant time savings",
+    tags:["time"] },
+  { name:"Hans Miller", role:"Sales", dept:["Sales"],
+    task:"Manually tracked action items.",
+    input:"Prompts for action items and questions",
+    assist:"Summarizes action items",
+    output:"Emails, one-pagers",
+    impact:"Captures customer concerns and inquiries clearly",
+    tags:["insight"] },
+  { name:"Haleigh Heilman", role:"Marketing & Communications Manager II", dept:["Marketing"],
+    task:"Built quarterly newsletter manually.",
+    input:"Previous newsletters, executive cadence",
+    assist:"Personalizes and drafts content",
+    output:"Newsletter intro, CEO Corner, updated sections",
+    impact:"Time savings, improved content quality",
+    tags:["time","quality"] },
+  { name:"Jason Pavlovich", role:"Inside AE", dept:["Sales"],
+    task:"Drafted alignment emails after calls.",
+    input:"Call transcripts, website context",
+    assist:"Drafts emails",
+    output:"Emails",
+    impact:"Time savings, improved quality",
+    tags:["time","quality"] },
+  { name:"Eric Brandt", role:"Director of Marketing", dept:["Marketing","Leadership"],
+    task:"Website maintenance.",
+    input:"Web page and conference content",
+    assist:"Creates custom HTML elements",
+    output:"Website updates",
+    impact:"Improved website quality and user experience",
+    tags:["quality"] },
+  { name:"Hannah Stydahar", role:"Marketing Coordinator", dept:["Marketing"],
+    task:"Manual content creation and planning.",
+    input:"Content type and objective",
+    assist:"Drafts, personalizes, and analyzes content",
+    output:"LinkedIn posts, email cadences, campaign plans, analytics reporting",
+    impact:"Time savings",
+    tags:["time"] },
+  { name:"George Cobb", role:"SDR", dept:["Sales"],
+    task:"Manual cold email creation.",
+    input:"Time-intensive personalization",
+    assist:"Drafts emails based on templates",
+    output:"Personalized outbound emails",
+    impact:"Increased outreach volume, more meetings booked",
+    tags:["volume","efficiency"] },
+  { name:"Grant Piane", role:"Sales", dept:["Sales"],
+    task:"Prepared for calls manually using recordings and notes.",
+    input:"Transcripts, emails, CRM data, proposals, pricing",
+    assist:"Summarizes calls, identifies objections, drafts emails, builds discovery and negotiation strategy",
+    output:"Follow-ups, call prep notes, discovery questions, executive summaries, talk tracks",
+    impact:"Significant prep time reduction, improved communication quality, better deal momentum",
+    tags:["time","quality","efficiency"] },
+  { name:"Brian Friedman", role:"VP Sales", dept:["Leadership"],
+    task:"Drafted emails and reports manually.",
+    input:"Self-written drafts",
+    assist:"Personalizes and improves messaging",
+    output:"Emails and reports",
+    impact:"Higher-quality communication aligned to intent",
+    tags:["quality"] },
+  { name:"Alex Carter", role:"Director of Sales", dept:["Leadership"],
+    task:"Reviewed sales calls by listening end-to-end.",
+    input:"Gong call recordings",
+    assist:"Extracts key insights (pain points, excitement, tech stack)",
+    output:"Highlighted call insights",
+    impact:"Time savings, improved insight capture, scalable process for team",
+    tags:["time","insight","volume"] },
+  { name:"Alex Cossoff", role:"Inside AE", dept:["Sales"],
+    task:"Manually took notes during calls.",
+    input:"Gong and Fathom",
+    assist:"Summarizes notes and enables search",
+    output:"Gong flows, structured notes",
+    impact:"Easier search, improved insights, better planning",
+    tags:["insight","quality"] },
+  { name:"Lori Ellis", role:"Sales", dept:["Sales"],
+    task:"Manually calculated EOC increases.",
+    input:"Contracts",
+    assist:"Calculates totals and rounding",
+    output:"Contract updates, emails",
+    impact:"Time savings",
+    tags:["time"] },
+  { name:"Lee Powell", role:"RevOps / Operations", dept:["RevOps"],
+    task:"Manual CRM updates, process tracking, reporting analysis, and knowledge management.",
+    input:"CRM data, call/email activity, workflow processes, internal SOPs and playbooks",
+    assist:"Automates CRM hygiene, detects process bottlenecks, explains forecast variance, surfaces risks, and enables searchable knowledge management",
+    output:"Cleaner CRM data, workflow insights, forecast explanations, accessible SOPs/playbooks",
+    impact:"Time savings, improved data accuracy, stronger cross-team visibility",
+    tags:["time","insight","efficiency"] },
+  { name:"Todd Rolfes", role:"VP of Solution Engineering & Design", dept:["Sales","RevOps"],
+    task:"Manually edited correspondence, analyzed industry data, and standardized PowerPoint presentations.",
+    input:"Email drafts, Word documents, Excel spreadsheets, CSV files, fixed width text files, PDFs, customer tickets, enhancement requests, competitor materials, Teams transcripts, PowerPoint slides",
+    assist:"Automates and streamlines analysis of large data sets, recommends professional email responses and document formatting, improves consistency of output and slide decks",
+    output:"Emails, Word documents (policies, white papers, talking points), Excel spreadsheets, feature comparisons",
+    impact:"Provides strong analytics in real-time, improves accuracy and professionalism of emails, policies, documents, and letters",
+    tags:["time","quality","insight","efficiency"] },
+  { name:"Mark Roberge", role:"Account Executive, Banks", dept:["Sales"],
+    task:"Manually organized notes from internal calls and drafted emails without AI assistance.",
+    input:"General questions on various topics, call notes, and informational context",
+    assist:"Streamlines tasks and creates efficiency across note organization, email drafting, and information lookup",
+    output:"Organized call notes, emails, and answers to questions delivered within seconds",
+    impact:"Time savings and improved accuracy",
+    tags:["time","quality","efficiency"] }
+];
+
+let activeDept = 'all';
+let activeImpact = 'all';
+
+function initials(n){ return n.split(' ').map(p=>p[0]).join('').toUpperCase(); }
+
+function render(){
+  const grid = document.getElementById('grid');
+  const filtered = people.filter(p => {
+    const deptOk = activeDept === 'all' || p.dept.includes(activeDept);
+    const impactOk = activeImpact === 'all' || p.tags.includes(activeImpact);
+    return deptOk && impactOk;
+  });
+  document.getElementById('count').textContent = filtered.length;
+  if(!filtered.length){
+    grid.innerHTML = '<div class="empty">No results for this combination — try adjusting the filters.</div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(p => `
+    <div class="card">
+      <div class="card-head">
+        <div class="avatar">${initials(p.name)}</div>
+        <div>
+          <div class="name">${p.name}</div>
+          <span class="role-badge">${p.role}</span>
+        </div>
+      </div>
+      <div class="sec"><div class="sec-label">Before AI</div><div class="sec-body">${p.task}</div></div>
+      <div class="sec"><div class="sec-label">Input</div><div class="sec-body">${p.input}</div></div>
+      <div class="sec"><div class="sec-label">AI assist</div><div class="sec-body">${p.assist}</div></div>
+      <div class="sec"><div class="sec-label">Output</div><div class="sec-body">${p.output}</div></div>
+      <div class="sec"><div class="sec-label">Impact</div><span class="impact-pill">${p.impact}</span></div>
+    </div>
+  `).join('');
+}
+
+function setDept(d, btn){
+  activeDept = d;
+  document.querySelectorAll('.chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function setImpact(i, btn){
+  activeImpact = i;
+  document.querySelectorAll('.side-chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
